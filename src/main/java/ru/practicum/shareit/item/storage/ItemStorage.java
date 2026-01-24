@@ -13,4 +13,8 @@ public interface ItemStorage {
     Item update(Item item);
 
     Optional<Item> getItemById(Long itemId);
+
+    Collection<Item> getItemsBySearchText(String searchText);
+
+    Collection<Item> getAllItems();
 }

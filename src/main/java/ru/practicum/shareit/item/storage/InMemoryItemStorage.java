@@ -43,4 +43,21 @@ public class InMemoryItemStorage implements ItemStorage {
         }
         return Optional.of(item);
     }
+
+    @Override
+    public List<Item> getItemsBySearchText(String searchText) {
+        List<Item> foundItems = new ArrayList<>();
+        for (Item item : items.values()) {
+            if ((item.getName().toLowerCase().contains(searchText) || item.getDescription().toLowerCase().contains(searchText))
+                    && item.getAvailable().equals(true)) {
+                foundItems.add(item);
+            }
+        }
+        return foundItems;
+    }
+
+    @Override
+    public List<Item> getAllItems() {
+        return items.values().stream().toList();
+    }
 }

@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -56,5 +57,25 @@ public class ItemServiceImpl implements ItemService {
         return itemStorage.getItemById(itemId)
                 .map(ItemMapper::mapToDto)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id = %d не найдена", itemId)));
+    }
+
+    @Override
+    public List<ItemDto> getItemsBySearchText(String searchText) {
+        List<Item> foundItems;
+        if (searchText.isBlank()) {
+            foundItems = new ArrayList<>();
+        } else {
+            foundItems = itemStorage.getItemsBySearchText(searchText.toLowerCase()).stream().toList();
+        }
+        return foundItems.stream()
+                .map(ItemMapper::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<ItemDto> getAllItems() {
+        return itemStorage.getAllItems().stream()
+                .map(ItemMapper::mapToDto)
+                .toList();
     }
 }
