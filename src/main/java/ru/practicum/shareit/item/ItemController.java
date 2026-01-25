@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.utils.HttpHeadersConstants;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto create(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @Valid @RequestBody ItemDto newItem
     ) {
         return itemService.create(userId, newItem);
@@ -29,13 +30,13 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getUserItems(@RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId) {
         return itemService.getUserItems(userId);
     }
 
     @PatchMapping("/{id}")
     public ItemDto update(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @PathVariable long id,
             @RequestBody ItemUpdateDto updatedItem
     ) {
@@ -45,7 +46,7 @@ public class ItemController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ItemDto getItemById(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @PathVariable long id
     ) {
         return itemService.getItemById(id);
@@ -54,7 +55,7 @@ public class ItemController {
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public List<ItemDto> getItemsBySearchText(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @RequestParam(value = "text") String searchText
     ) {
         return itemService.getItemsBySearchText(searchText);
