@@ -1,16 +1,25 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Data
-@Builder
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @Column(name = "name", nullable = false)
     String name;
+    @Column(name = "email", nullable = false)
     String email;
-    @Builder.Default
-    LocalDate registrationDate = LocalDate.now();
+    @Column(name = "registration_date", columnDefinition = "date default current_date")
+    LocalDate registrationDate;
 }

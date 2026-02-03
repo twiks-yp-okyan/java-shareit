@@ -6,13 +6,17 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDate;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserMapper {
     public static User mapToUser(UserDto dto) {
-        return User.builder()
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .build();
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        LocalDate registrationDate = dto.getRegistrationDate() == null ? LocalDate.now() : dto.getRegistrationDate();
+        user.setRegistrationDate(registrationDate);
+        return user;
     }
 
     public static UserDto mapToDto(User user) {
