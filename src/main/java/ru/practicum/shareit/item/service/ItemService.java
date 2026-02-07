@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
@@ -16,5 +18,5 @@ public interface ItemService {
 
     List<ItemDto> getItemsBySearchText(String searchText);
 
-    List<ItemDto> getAllItems();
+    Page<ItemDto> getAllItems(Pageable pageable);
 }

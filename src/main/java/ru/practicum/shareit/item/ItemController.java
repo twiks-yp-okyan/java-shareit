@@ -3,6 +3,8 @@ package ru.practicum.shareit.item;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -62,7 +64,7 @@ public class ItemController {
     }
 
     @GetMapping("/all")
-    public List<ItemDto> getAllItems() {
-        return itemService.getAllItems();
+    public Page<ItemDto> getAllItems(Pageable pageable) {
+        return itemService.getAllItems(pageable);
     }
 }

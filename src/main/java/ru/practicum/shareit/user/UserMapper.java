@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public final class UserMapper {
     public static User mapToUser(UserDto dto) {
         User user = new User();
+        user.setId(dto.getId());
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         LocalDate registrationDate = dto.getRegistrationDate() == null ? LocalDate.now() : dto.getRegistrationDate();

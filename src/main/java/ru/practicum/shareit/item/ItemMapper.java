@@ -5,23 +5,24 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
-    public static Item mapToItem(ItemDto dto) {
-        return Item.builder()
-                .ownerId(dto.getOwnerId())
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .available(dto.getAvailable())
-                .requestId(dto.getRequestId())
-                .build();
+    public static Item mapToItem(ItemDto dto, User owner) {
+        Item item = new Item();
+        item.setOwner(owner);
+        item.setName(dto.getName());
+        item.setDescription(dto.getDescription());
+        item.setAvailable(dto.getAvailable());
+        item.setRequestId(dto.getRequestId());
+        return item;
     }
 
     public static ItemDto mapToDto(Item item) {
         ItemDto dto = new ItemDto();
         dto.setId(item.getId());
-        dto.setOwnerId(item.getOwnerId());
+        dto.setOwnerId(item.getOwner().getId());
         dto.setName(item.getName());
         dto.setDescription(item.getDescription());
         dto.setAvailable(item.getAvailable());
