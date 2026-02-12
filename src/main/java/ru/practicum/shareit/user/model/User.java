@@ -15,11 +15,11 @@ import java.time.LocalDate;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(name = "name", nullable = false)
-    String name;
+    private String name;
     @Column(name = "email", nullable = false)
-    String email;
+    private String email;
     @Column(name = "registration_date", columnDefinition = "date default current_date")
-    LocalDate registrationDate;
+    private LocalDate registrationDate;
 }

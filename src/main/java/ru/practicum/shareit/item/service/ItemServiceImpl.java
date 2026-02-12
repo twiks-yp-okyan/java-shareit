@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
-import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -35,8 +31,10 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto create(Long userId, ItemDto newItem) {
         log.debug("Trying to save new Item by user {}: {}", userId, newItem.toString());
-        User user = UserMapper.mapToUser(userService.getById(userId));
-        Item item = repository.save(ItemMapper.mapToItem(newItem, user));
+        User user = userService.getEntityById(userId);
+        Item item = ItemMapper.mapToItem(newItem);
+        item.setOwner(user);
+        item = repository.save(item);
         return ItemMapper.mapToDto(item);
     }
 
@@ -67,6 +65,12 @@ public class ItemServiceImpl implements ItemService {
         return repository.findById(itemId)
                 .map(ItemMapper::mapToDto)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id = %d не найдена", itemId)));
+    }
+
+    @Override
+    public Item getEntityById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Вещь с id = %d не найдена", id)));
     }
 
     @Override

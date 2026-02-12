@@ -33,4 +33,10 @@ public class ErrorHandler {
         return new ErrorInfo(e.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorInfo handleBookingDates(final BookingConflictException e) {
+        return new ErrorInfo(e.getMessage());
+    }
+
 }
