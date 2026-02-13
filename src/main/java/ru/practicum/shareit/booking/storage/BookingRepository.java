@@ -17,12 +17,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             select b
             from Booking b
             where b.item.id in :itemIds
-            and b.startAt < current_timestamp
+            and b.endAt < current_timestamp
             and b.status = :status
             and b.startAt = (select max(b2.startAt)
                             from Booking b2
                             where b2.item.id = b.item.id
-                            and b2.startAt < current_timestamp
+                            and b.endAt < current_timestamp
                             and b2.status = :status)
             """)
     List<Booking> findLastItemsBooking(@Param("itemIds") List<Long> itemIds, @Param("status") BookingStatus status);

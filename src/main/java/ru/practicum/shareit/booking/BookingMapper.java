@@ -19,6 +19,7 @@ public class BookingMapper {
         booking.setStartAt(LocalDateTime.parse(dto.getStartAt(), formatter));
         booking.setEndAt(LocalDateTime.parse(dto.getEndAt(), formatter));
         booking.setStatus(dto.getStatus());
+        booking.setCreatedAt(LocalDateTime.now());
         return booking;
     }
 

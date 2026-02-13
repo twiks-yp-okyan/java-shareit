@@ -9,17 +9,23 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exceptions.BookingConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UserNotOwnerException;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.comment.CommentMapper;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.model.Comment;
+import ru.practicum.shareit.item.comment.storage.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingDatesDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDatesAndCommentsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +40,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
     private final UserService userService;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     @Transactional
@@ -47,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemWithBookingDatesDto> getUserItems(Long userId) {
+    public List<ItemWithBookingDatesAndCommentsDto> getUserItems(Long userId) {
         User user = userService.getEntityById(userId);
         List<Item> userItems = repository.findByOwnerId(user.getId());
         List<Long> userItemsIds = userItems.stream().map(Item::getId).toList();
@@ -62,6 +69,7 @@ public class ItemServiceImpl implements ItemService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public ItemDto update(Long userId, Long itemId, ItemUpdateDto updatedItem) {
         log.debug("Trying to update Item by user {}: {}", userId, updatedItem.toString());
@@ -78,10 +86,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getItemById(Long itemId) {
-        return repository.findById(itemId)
-                .map(ItemMapper::mapToDto)
+    public ItemWithBookingDatesAndCommentsDto getItemById(Long itemId) {
+        Item item = repository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id = %d не найдена", itemId)));
+        List<CommentDto> comments = commentRepository.findByItemId(itemId).stream()
+                .map(CommentMapper::mapToDto)
+                .toList();
+        ItemWithBookingDatesAndCommentsDto response = ItemMapper.mapToDtoWithDates(item, null, null);
+        response.setComments(comments);
+        return response;
     }
 
     @Override
@@ -102,5 +115,26 @@ public class ItemServiceImpl implements ItemService {
     public Page<ItemDto> getAllItems(Pageable pageable) {
         return repository.findAll(pageable)
                 .map(ItemMapper::mapToDto);
+    }
+
+    @Transactional
+    @Override
+    public CommentDto addNewComment(Long userId, Long itemId, CommentDto commentRequest) {
+        final User user = userService.getEntityById(userId);
+        Item item = getEntityById(itemId);
+        bookingRepository.findByBookerId(user.getId()).stream()
+            .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED)
+                    && booking.getEndAt().isBefore(LocalDateTime.now())
+                    && booking.getBooker().getId().equals(user.getId()) )
+            .findAny()
+            .orElseThrow(() -> new BookingConflictException(
+                    String.format("У пользователя с id = %d нет завершенных аренд вещи с id = %d", user.getId(), item.getId())
+            ));
+
+        Comment comment = CommentMapper.mapToComment(commentRequest);
+        comment.setItem(item);
+        comment.setAuthor(user);
+        comment = commentRepository.save(comment);
+        return CommentMapper.mapToDto(comment);
     }
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
@@ -24,11 +25,13 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository repository;
     private final UserService userService;
     private final ItemService itemService;
 
+    @Transactional
     @Override
     public BookingDto create(BookingRequestDto dto, long userId) {
         Booking booking = BookingMapper.mapToNewBooking(dto);
@@ -47,6 +50,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.mapToDto(booking);
     }
 
+    @Transactional
     @Override
     public BookingDto reviewBooking(Long userId, Long bookingId, Boolean isApproved) {
         Booking booking = getEntityById(bookingId);

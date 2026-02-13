@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -20,6 +19,6 @@ public class User {
     private String name;
     @Column(name = "email", nullable = false)
     private String email;
-    @Column(name = "registration_date", columnDefinition = "date default current_date")
+    @Column(name = "registration_date")
     private LocalDate registrationDate;
 }
