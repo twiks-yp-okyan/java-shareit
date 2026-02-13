@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDatesDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.utils.HttpHeadersConstants;
 
@@ -32,7 +33,7 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> getUserItems(@RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId) {
+    public List<ItemWithBookingDatesDto> getUserItems(@RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId) {
         return itemService.getUserItems(userId);
     }
 

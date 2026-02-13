@@ -88,32 +88,27 @@ public class BookingServiceImpl implements BookingService {
         return userBookingsStream.map(BookingMapper::mapToDto).toList();
     }
 
-    public Booking getEntityById(Long id) {
+    private Booking getEntityById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Бронирование с id = %d не найдено", id)));
     }
 
     private Stream<Booking> filterBookingsByStateAndSort(List<Booking> bookings, BookingState state) {
         final LocalDateTime currentTime = LocalDateTime.now();
-        return switch (state) {
+        Stream<Booking> bookingsStream = switch (state) {
             case CURRENT -> bookings.stream()
                     .filter(booking -> booking.getStartAt().isBefore(currentTime)
-                            && booking.getEndAt().isAfter(currentTime))
-                    .sorted(Comparator.comparing(Booking::getStartAt));
+                            && booking.getEndAt().isAfter(currentTime));
             case PAST -> bookings.stream()
-                    .filter(booking -> booking.getEndAt().isBefore(currentTime))
-                    .sorted(Comparator.comparing(Booking::getStartAt));
+                    .filter(booking -> booking.getEndAt().isBefore(currentTime));
             case FUTURE -> bookings.stream()
-                    .filter(booking -> booking.getStartAt().isAfter(currentTime))
-                    .sorted(Comparator.comparing(Booking::getStartAt));
+                    .filter(booking -> booking.getStartAt().isAfter(currentTime));
             case WAITING -> bookings.stream()
-                    .filter(booking -> booking.getStatus().equals(BookingStatus.WAITING))
-                    .sorted(Comparator.comparing(Booking::getStartAt));
+                    .filter(booking -> booking.getStatus().equals(BookingStatus.WAITING));
             case REJECTED -> bookings.stream()
-                    .filter(booking -> booking.getStatus().equals(BookingStatus.REJECTED))
-                    .sorted(Comparator.comparing(Booking::getStartAt));
-            default -> bookings.stream()
-                    .sorted(Comparator.comparing(Booking::getStartAt));
+                    .filter(booking -> booking.getStatus().equals(BookingStatus.REJECTED));
+            default -> bookings.stream();
         };
+        return bookingsStream.sorted(Comparator.comparing(Booking::getStartAt).reversed());
     }
 }

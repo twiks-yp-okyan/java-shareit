@@ -6,11 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UserNotOwnerException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDatesDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -18,6 +22,9 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,6 +33,7 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository repository;
     private final UserService userService;
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional
@@ -39,9 +47,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getUserItems(Long userId) {
-        return repository.findByOwnerId(userId).stream()
-                .map(ItemMapper::mapToDto)
+    public List<ItemWithBookingDatesDto> getUserItems(Long userId) {
+        User user = userService.getEntityById(userId);
+        List<Item> userItems = repository.findByOwnerId(user.getId());
+        List<Long> userItemsIds = userItems.stream().map(Item::getId).toList();
+        Map<Long, Booking> lastBookings = bookingRepository.findLastItemsBooking(userItemsIds, BookingStatus.APPROVED).stream()
+                .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));
+        Map<Long, Booking> nextBookings = bookingRepository.findNextItemsBooking(userItemsIds, BookingStatus.APPROVED).stream()
+                .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));
+        return userItems.stream()
+                .map(item -> ItemMapper.mapToDtoWithDates(
+                        item, lastBookings.get(item.getId()), nextBookings.get(item.getId())
+                ))
                 .toList();
     }
 
