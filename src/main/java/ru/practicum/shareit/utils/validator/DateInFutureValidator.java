@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 public class DateInFutureValidator implements ConstraintValidator<DateInFuture, String> {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
     @Override
     public boolean isValid(String dateTimeString, ConstraintValidatorContext context) {
         if (dateTimeString == null) {
