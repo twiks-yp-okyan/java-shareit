@@ -21,11 +21,11 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public List<Item> getUserItems(Long userId) {
         List<Item> userItems = new ArrayList<>();
-        for (Item item : items.values()) {
-            if (item.getOwnerId().equals(userId)) {
-                userItems.add(item);
-            }
-        }
+//        for (Item item : items.values()) {
+//            if (item.getOwnerId().equals(userId)) {
+//                userItems.add(item);
+//            }
+//        }
         return userItems;
     }
 
