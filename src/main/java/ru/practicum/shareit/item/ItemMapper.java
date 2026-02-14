@@ -3,12 +3,14 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDatesAndCommentsDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
@@ -44,7 +46,7 @@ public final class ItemMapper {
         }
     }
 
-    public static ItemWithBookingDatesAndCommentsDto mapToDtoWithDates(Item item, Booking lastBooking, Booking nextBooking) {
+    public static ItemWithBookingDatesAndCommentsDto mapToDtoWithDates(Item item, Booking lastBooking, Booking nextBooking, List<CommentDto> comments) {
         ItemWithBookingDatesAndCommentsDto dto = new ItemWithBookingDatesAndCommentsDto();
         dto.setId(item.getId());
         dto.setOwnerId(item.getOwner().getId());
@@ -55,6 +57,7 @@ public final class ItemMapper {
         dto.setLastBookingDate(lastBookingStartAt);
         LocalDateTime nextBookingStartAt = nextBooking == null ? null : nextBooking.getStartAt();
         dto.setNextBookingDate(nextBookingStartAt);
+        dto.setComments(comments);
         dto.setRequestId(item.getRequestId());
         return dto;
     }

@@ -58,13 +58,12 @@ public class ItemServiceImpl implements ItemService {
         User user = userService.getEntityById(userId);
         List<Item> userItems = repository.findByOwnerId(user.getId());
         List<Long> userItemsIds = userItems.stream().map(Item::getId).toList();
-        Map<Long, Booking> lastBookings = bookingRepository.findLastItemsBooking(userItemsIds, BookingStatus.APPROVED).stream()
-                .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));
-        Map<Long, Booking> nextBookings = bookingRepository.findNextItemsBooking(userItemsIds, BookingStatus.APPROVED).stream()
-                .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));
+        Map<Long, Booking> lastBookings = findItemsLastBooking(userItemsIds);
+        Map<Long, Booking> nextBookings = findItemsNextBooking(userItemsIds);
+        Map<Long, List<CommentDto>> itemsComments = findItemsComments(userItemsIds);
         return userItems.stream()
                 .map(item -> ItemMapper.mapToDtoWithDates(
-                        item, lastBookings.get(item.getId()), nextBookings.get(item.getId())
+                        item, lastBookings.get(item.getId()), nextBookings.get(item.getId()), itemsComments.get(item.getId())
                 ))
                 .toList();
     }
@@ -92,9 +91,7 @@ public class ItemServiceImpl implements ItemService {
         List<CommentDto> comments = commentRepository.findByItemId(itemId).stream()
                 .map(CommentMapper::mapToDto)
                 .toList();
-        ItemWithBookingDatesAndCommentsDto response = ItemMapper.mapToDtoWithDates(item, null, null);
-        response.setComments(comments);
-        return response;
+        return ItemMapper.mapToDtoWithDates(item, null, null, comments);
     }
 
     @Override
@@ -136,5 +133,21 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(user);
         comment = commentRepository.save(comment);
         return CommentMapper.mapToDto(comment);
+    }
+
+    private Map<Long, Booking> findItemsLastBooking(List<Long> itemIds) {
+        return bookingRepository.findLastItemsBooking(itemIds, BookingStatus.APPROVED).stream()
+                .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));
+    }
+
+    private Map<Long, Booking> findItemsNextBooking(List<Long> itemIds) {
+        return bookingRepository.findNextItemsBooking(itemIds, BookingStatus.APPROVED).stream()
+                .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));
+    }
+
+    private Map<Long, List<CommentDto>> findItemsComments(List<Long> itemIds) {
+        return itemIds.stream()
+                .collect(Collectors.toMap(Function.identity(),
+                        itemId -> commentRepository.findByItemId(itemId).stream().map(CommentMapper::mapToDto).toList()));
     }
 }
