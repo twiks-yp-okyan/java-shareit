@@ -59,10 +59,15 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ItemRequestWithResponseDto getById(Long requestId) {
-        ItemRequest request = repository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException(String.format("Запроса с id = %d не существует", requestId)));
+    public ItemRequestWithResponseDto getByIdWithResponse(Long requestId) {
+        ItemRequest request = getEntityById(requestId);
         List<ItemDto> requestResponses = itemService.getItemsByRequestIds(List.of(requestId));
         return ItemRequestMapper.mapToResponseDto(request, requestResponses);
+    }
+
+    @Override
+    public ItemRequest getEntityById(long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Запроса с id = %d не существует", id)));
     }
 }

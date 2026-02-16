@@ -22,6 +22,7 @@ import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDatesAndCommentsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -41,12 +42,18 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional
     public ItemDto create(Long userId, ItemDto newItem) {
         log.debug("Trying to save new Item by user {}: {}", userId, newItem.toString());
         User user = userService.getEntityById(userId);
+        if (newItem.getRequestId() != null && !itemRequestRepository.existsById(newItem.getRequestId())) {
+            throw new NotFoundException(
+                    String.format("Запроса с id = %d не существует, добавить вещь для такого запроса невозможно.",
+                            newItem.getRequestId()));
+        }
         Item item = ItemMapper.mapToItem(newItem);
         item.setOwner(user);
         item = repository.save(item);

@@ -45,6 +45,6 @@ public class ItemRequestController {
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @PathVariable(value = "requestId") Long requestId
     ) {
-        return itemRequestService.getById(requestId);
+        return itemRequestService.getByIdWithResponse(requestId);
     }
 }
