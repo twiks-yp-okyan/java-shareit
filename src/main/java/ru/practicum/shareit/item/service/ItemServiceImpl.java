@@ -135,6 +135,13 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.mapToDto(comment);
     }
 
+    @Override
+    public List<ItemDto> getItemsByRequestIds(List<Long> requestIds) {
+        return repository.findByRequestIds(requestIds).stream()
+                .map(ItemMapper::mapToDto)
+                .toList();
+    }
+
     private Map<Long, Booking> findItemsLastBooking(List<Long> itemIds) {
         return bookingRepository.findLastItemsBooking(itemIds, BookingStatus.APPROVED).stream()
                 .collect(Collectors.toMap(booking -> booking.getItem().getId(), Function.identity()));

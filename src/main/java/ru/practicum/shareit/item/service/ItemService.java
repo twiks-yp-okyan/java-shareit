@@ -26,4 +26,6 @@ public interface ItemService {
     Page<ItemDto> getAllItems(Pageable pageable);
 
     CommentDto addNewComment(Long userId, Long itemId, CommentDto commentRequest);
+
+    List<ItemDto> getItemsByRequestIds(List<Long> requestIds);
 }

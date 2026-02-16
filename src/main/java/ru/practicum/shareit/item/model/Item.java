@@ -25,6 +25,5 @@ public class Item {
     @Column(nullable = false)
     private String description;
     private Boolean available;
-    // TO DO выяснить тип связи и реализовать
     private Long requestId;
 }

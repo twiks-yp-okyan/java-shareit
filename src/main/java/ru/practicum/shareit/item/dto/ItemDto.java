@@ -9,7 +9,7 @@ import lombok.Data;
 public class ItemDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long ownerId;
     @NotBlank
     private String name;
