@@ -23,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDto> getUsers(Integer from, Integer size) {
+        // TODO исправить расчет номера страницы
         PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
         return repository.findAll(page).stream()
                 .map(UserMapper::mapToDto)
