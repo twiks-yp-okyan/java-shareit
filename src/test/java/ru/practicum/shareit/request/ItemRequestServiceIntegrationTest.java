@@ -1,5 +1,7 @@
 package ru.practicum.shareit.request;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ public class ItemRequestServiceIntegrationTest {
     private final ItemService itemService;
     private final UserService userService;
     private final ItemRequestService service;
+    private final EntityManager em;
 
     @Test
     public void shouldSaveNewItemRequest() {
@@ -33,6 +36,12 @@ public class ItemRequestServiceIntegrationTest {
         UserDto newUserDto = userService.create(newUserRequest);
         ItemRequestDto itemRequestDto = createNewRequestDto();
         ItemRequestDto savedRequest = service.create(newUserDto.getId(), itemRequestDto);
+
+        TypedQuery<User> query = em.createQuery("Select u from User u where u.name = :name", User.class);
+        User user = query.setParameter("name", newUserRequest.getName())
+                .getSingleResult();
+
+        Assertions.assertEquals(user.getName(), newUserRequest.getName());
 
         Assertions.assertNotNull(savedRequest.getId());
         Assertions.assertEquals("item request description", savedRequest.getDescription());
