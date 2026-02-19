@@ -15,14 +15,9 @@ public class BookingDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     @JsonProperty("start")
-    @NotNull
-    @DateInFuture
     private String startAt;
     @JsonProperty("end")
-    @NotNull
-    @DateInFuture
     private String endAt;
-    @NotNull
     private Item item;
     private User booker;
     private BookingStatus status;

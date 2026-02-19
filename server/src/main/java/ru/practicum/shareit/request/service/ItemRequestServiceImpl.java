@@ -59,7 +59,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ItemRequestWithResponseDto getByIdWithResponse(Long requestId) {
+    public ItemRequestWithResponseDto getByIdWithResponse(Long userId, Long requestId) {
+        userService.getEntityById(userId);
         ItemRequest request = getEntityById(requestId);
         List<ItemDto> requestResponses = itemService.getItemsByRequestIds(List.of(requestId));
         return ItemRequestMapper.mapToResponseDto(request, requestResponses);

@@ -12,8 +12,6 @@ import ru.practicum.shareit.dto.ItemDto;
 import ru.practicum.shareit.dto.ItemUpdateDto;
 import ru.practicum.shareit.utils.HttpHeadersConstants;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class ItemController {
     public ResponseEntity<Object> update(
             @RequestHeader(HttpHeadersConstants.X_SHARER_USER_ID) Long userId,
             @PathVariable long id,
-            @RequestBody ItemUpdateDto updatedItem
+            @Valid @RequestBody ItemUpdateDto updatedItem
     ) {
         return itemClient.update(userId, id, updatedItem);
     }

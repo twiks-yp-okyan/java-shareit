@@ -26,10 +26,12 @@ import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,8 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
+
+    private final Clock clock;
 
     @Override
     @Transactional
@@ -128,8 +132,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = getEntityById(itemId);
         bookingRepository.findByBookerId(user.getId()).stream()
             .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED)
-                    && booking.getEndAt().isBefore(LocalDateTime.now())
-                    && booking.getBooker().getId().equals(user.getId()))
+                    && booking.getEndAt().isBefore(LocalDateTime.now(clock)))
             .findAny()
             .orElseThrow(() -> new BookingConflictException(
                     String.format("У пользователя с id = %d нет завершенных аренд вещи с id = %d", user.getId(), item.getId())
