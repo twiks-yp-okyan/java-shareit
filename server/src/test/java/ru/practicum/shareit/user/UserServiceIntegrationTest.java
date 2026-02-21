@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @SpringBootTest
@@ -109,6 +110,77 @@ public class UserServiceIntegrationTest {
         service.delete(savedUser.getId());
 
         Assertions.assertThrows(NotFoundException.class, () -> service.getById(savedUser.getId()));
+    }
+
+    @Test
+    public void shouldGetUsersPaginated() {
+        UserDto dto = new UserDto();
+        for (int i = 0; i < 3; i++) {
+            changeUserUpdateDtoData(dto, "User " + i, "user" + i + "@gmail.com");
+            service.create(dto);
+        }
+
+        Collection<UserDto> page1 = service.getUsers(0, 2);
+        Collection<UserDto> pageAll = service.getUsers(0, 10);
+
+        Assertions.assertEquals(2, page1.size());
+        Assertions.assertEquals(3, pageAll.size());
+    }
+
+    @Test
+    public void shouldGetByIdThrowWhenNotFound() {
+        Assertions.assertThrows(NotFoundException.class, () -> service.getById(999L));
+    }
+
+    @Test
+    public void shouldGetEntityById() {
+        UserDto saved = service.create(basicUserDto);
+
+        User entity = service.getEntityById(saved.getId());
+
+        Assertions.assertEquals(saved.getId(), entity.getId());
+        Assertions.assertEquals("Test", entity.getName());
+        Assertions.assertEquals("test@gmail.com", entity.getEmail());
+    }
+
+    @Test
+    public void shouldGetEntityByIdThrowWhenNotFound() {
+        Assertions.assertThrows(NotFoundException.class, () -> service.getEntityById(999L));
+    }
+
+    @Test
+    public void shouldCreateThrowWhenEmailExists() {
+        service.create(basicUserDto);
+
+        UserDto duplicateEmail = new UserDto();
+        duplicateEmail.setName("Other");
+        duplicateEmail.setEmail(basicUserDto.getEmail());
+
+        Assertions.assertThrows(ConflictDataException.class, () -> service.create(duplicateEmail));
+    }
+
+    @Test
+    public void shouldUpdateUser() {
+        UserDto saved = service.create(basicUserDto);
+        UserUpdateDto update = new UserUpdateDto();
+        update.setName("Updated name");
+        update.setEmail("updated@gmail.com");
+
+        UserDto updated = service.update(saved.getId(), update);
+
+        Assertions.assertEquals("Updated name", updated.getName());
+        Assertions.assertEquals("updated@gmail.com", updated.getEmail());
+    }
+
+    @Test
+    public void shouldUpdateThrowWhenUserNotFound() {
+        Assertions.assertThrows(NotFoundException.class,
+                () -> service.update(999L, basicUserUpdateDto));
+    }
+
+    @Test
+    public void shouldDeleteThrowWhenUserNotFound() {
+        Assertions.assertThrows(NotFoundException.class, () -> service.delete(999L));
     }
 
     private void changeUserUpdateDtoData(UserDto dto, String name, String email) {
