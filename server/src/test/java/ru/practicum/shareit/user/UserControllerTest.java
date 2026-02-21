@@ -78,9 +78,6 @@ public class UserControllerTest {
                 .thenReturn(responseDto);
 
         mockMvc.perform(get("/users/1")
-                .content(mapper.writeValueAsString(userDto))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -89,19 +86,10 @@ public class UserControllerTest {
 
     @Test
     public void shouldUpdateUserEmail() throws Exception {
-        UserDto responseDto = new UserDto();
-        responseDto.setId(1L);
-        responseDto.setEmail("test@gmail.com");
-        responseDto.setName("Test");
-
         UserDto responseUpdDto = new UserDto();
         responseUpdDto.setId(1L);
         responseUpdDto.setEmail("test-update@gmail.com");
         responseUpdDto.setName("Test-update");
-
-        Mockito
-                .when(userService.create(any()))
-                .thenReturn(responseDto);
 
         Mockito
                 .when(userService.update(anyLong(), any()))

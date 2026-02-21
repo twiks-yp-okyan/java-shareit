@@ -1,12 +1,18 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemUpdateDto {
-    private final String name;
-    private final String description;
-    private final Boolean available;
+    private String name;
+    private String description;
+    private Boolean available;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());
