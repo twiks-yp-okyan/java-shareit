@@ -8,11 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.BookingConflictException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UserNotOwnerException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -163,6 +166,105 @@ public class ItemServiceIntegrationTest {
 
         Assertions.assertEquals(1, itemsByRequestId.size());
         Assertions.assertEquals("Test", itemsByRequestId.getFirst().getName());
+    }
+
+    @Test
+    public void shouldCreateThrowWhenRequestNotFound() {
+        itemDto.setRequestId(999L);
+
+        Assertions.assertThrows(NotFoundException.class,
+                () -> service.create(userDto.getId(), itemDto));
+    }
+
+    @Test
+    public void shouldUpdateItem() {
+        ItemDto created = service.create(userDto.getId(), itemDto);
+        ItemUpdateDto update = new ItemUpdateDto("Updated name", "Updated description", false);
+
+        ItemDto updated = service.update(userDto.getId(), created.getId(), update);
+
+        Assertions.assertEquals("Updated name", updated.getName());
+        Assertions.assertEquals("Updated description", updated.getDescription());
+        Assertions.assertFalse(updated.getAvailable());
+    }
+
+    @Test
+    public void shouldUpdateThrowWhenItemNotFound() {
+        Assertions.assertThrows(NotFoundException.class,
+                () -> service.update(userDto.getId(), 999L, itemUpdateDto));
+    }
+
+    @Test
+    public void shouldGetItemById() {
+        ItemDto created = service.create(userDto.getId(), itemDto);
+
+        ItemWithBookingDatesAndCommentsDto found = service.getItemById(created.getId());
+
+        Assertions.assertEquals(created.getId(), found.getId());
+        Assertions.assertEquals("Test", found.getName());
+        Assertions.assertEquals("Test description", found.getDescription());
+        Assertions.assertTrue(found.getComments().isEmpty());
+    }
+
+    @Test
+    public void shouldGetItemByIdThrowWhenNotFound() {
+        Assertions.assertThrows(NotFoundException.class,
+                () -> service.getItemById(999L));
+    }
+
+    @Test
+    public void shouldGetEntityById() {
+        ItemDto created = service.create(userDto.getId(), itemDto);
+
+        Item entity = service.getEntityById(created.getId());
+
+        Assertions.assertEquals(created.getId(), entity.getId());
+        Assertions.assertEquals("Test", entity.getName());
+    }
+
+    @Test
+    public void shouldGetEntityByIdThrowWhenNotFound() {
+        Assertions.assertThrows(NotFoundException.class,
+                () -> service.getEntityById(999L));
+    }
+
+    @Test
+    public void shouldGetItemsBySearchTextReturnEmptyWhenBlank() {
+        service.create(userDto.getId(), itemDto);
+
+        Assertions.assertTrue(service.getItemsBySearchText("").isEmpty());
+        Assertions.assertTrue(service.getItemsBySearchText("   ").isEmpty());
+    }
+
+    @Test
+    public void shouldGetAllItems() {
+        service.create(userDto.getId(), itemDto);
+        ItemDto secondItem = new ItemDto();
+        secondItem.setName("Other");
+        secondItem.setDescription("Other desc");
+        secondItem.setAvailable(true);
+        service.create(userDto.getId(), secondItem);
+
+        var page = service.getAllItems(PageRequest.of(0, 10));
+
+        Assertions.assertEquals(2, page.getTotalElements());
+        Assertions.assertEquals(2, page.getContent().size());
+    }
+
+    @Test
+    public void shouldAddNewCommentThrowWhenNoCompletedBooking() {
+        UserDto bookerDto = new UserDto();
+        bookerDto.setName("Booker");
+        bookerDto.setEmail("booker@test.com");
+        final UserDto booker = userService.create(bookerDto);
+
+        ItemDto createdItem = service.create(userDto.getId(), itemDto);
+
+        CommentDto commentDto = new CommentDto();
+        commentDto.setText("Comment");
+
+        Assertions.assertThrows(BookingConflictException.class,
+                () -> service.addNewComment(booker.getId(), createdItem.getId(), commentDto));
     }
 
     private void changeItemData(ItemDto itemDto, String name, String description, Boolean available) {
