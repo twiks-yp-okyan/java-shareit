@@ -131,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = getEntityById(itemId);
         bookingRepository.findByBookerId(user.getId()).stream()
             .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED)
-                    && booking.getEndAt().isBefore(LocalDateTime.now(clock)))
+                    && booking.getEndAt().isBefore(LocalDateTime.now()))
             .findAny()
             .orElseThrow(() -> new BookingConflictException(
                     String.format("У пользователя с id = %d нет завершенных аренд вещи с id = %d", user.getId(), item.getId())
