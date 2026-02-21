@@ -129,9 +129,11 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto addNewComment(Long userId, Long itemId, CommentDto commentRequest) {
         final User user = userService.getEntityById(userId);
         Item item = getEntityById(itemId);
+        LocalDateTime now = LocalDateTime.now(clock);
         bookingRepository.findByBookerId(user.getId()).stream()
-            .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED)
-                    && booking.getEndAt().isBefore(LocalDateTime.now()))
+            .filter(booking -> booking.getItem().getId().equals(item.getId())
+                    && booking.getStatus().equals(BookingStatus.APPROVED)
+                    && booking.getEndAt().isBefore(now))
             .findAny()
             .orElseThrow(() -> new BookingConflictException(
                     String.format("У пользователя с id = %d нет завершенных аренд вещи с id = %d", user.getId(), item.getId())
