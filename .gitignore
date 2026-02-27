@@ -34,3 +34,5 @@ build/
 
 postman-tests.json
 volumes/
+/server/db/
+server/db/
